@@ -1,0 +1,89 @@
+{
+  "app": {
+    "title": "CLAUDE Post Formatter",
+    "subtitle": "Convert Claude's weird characters for social media posts"
+  },
+  "input": {
+    "title": "📝 Input Text",
+    "placeholder": "Enter or paste text..."
+  },
+  "output": {
+    "title": "✨ Converted Result",
+    "placeholder": "Converted result will be displayed and copied automatically..."
+  },
+  "buttons": {
+    "convertAndCopy": "🚀 Convert & Copy",
+    "add": "+ Add",
+    "loadDefault": "Load Default",
+    "delete": "X",
+    "load": "Load",
+    "deleteItem": "Delete",
+    "clear": "Clear",
+    "expand": "Expand",
+    "collapse": "Collapse"
+  },
+  "instructions": {
+    "title": "💡 Instructions",
+    "problem": {
+      "title": "🎯 What does this tool solve?",
+      "line1": "Claude's output often has weird English punctuation",
+      "line2": "Automatically converts to Chinese punctuation suitable for posts"
+    },
+    "step1": {
+      "title": "📝 Step 1: Paste Text",
+      "line1": "Paste Claude's output in the left input box",
+      "line2": "⚡ Instantly converts and copies after pasting"
+    },
+    "step2": {
+      "title": "📋 Step 2: Paste to Social Media",
+      "line1": "Automatically copies to clipboard after conversion",
+      "line2": "Paste directly to Facebook, Instagram, etc."
+    },
+    "rules": {
+      "title": "🛠️ Default Conversion Rules",
+      "rule1": "• English comma + space → Chinese comma",
+      "rule2": "• English period → Chinese period",
+      "rule3": "• English exclamation → Chinese exclamation",
+      "rule4": "• English question mark → Chinese question mark",
+      "rule5": "• Hyphen → Bullet point",
+      "note": "※ Customize replacement rules on the right"
+    }
+  },
+  "history": {
+    "title": "📜 History",
+    "empty": "No history records yet",
+    "confirm": "Are you sure you want to clear all history?",
+    "input": "Input:",
+    "output": "Output:",
+    "format": {
+      "fb": "FB Format",
+      "plain": "Plain Text"
+    }
+  },
+  "rules": {
+    "title": "⚙️ Text Replacement Rules",
+    "fromPlaceholder": "Original text",
+    "toPlaceholder": "Replacement text"
+  },
+  "format": {
+    "title": "📋 Output Format",
+    "plain": {
+      "title": "Plain Text",
+      "description": "Only converts punctuation"
+    },
+    "fb": {
+      "title": "FB Post Format",
+      "description": "Preserves spaces and line breaks"
+    }
+  },
+  "toast": {
+    "copySuccess": "✓ Successfully copied to clipboard!",
+    "copyError": "❌ Copy failed, please copy manually"
+  },
+  "footer": {
+    "copyright": "© 2025 @LukaHuang - All Rights Reserved"
+  },
+  "language": {
+    "label": "Language / 語言"
+  }
+}

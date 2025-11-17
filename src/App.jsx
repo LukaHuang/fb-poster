@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import toast, { Toaster } from 'react-hot-toast'
 import { convertWhitespace } from './lib/whitespaceConverter'
 import { replaceText, DEFAULT_RULES } from './lib/textReplacer'
@@ -8,12 +9,19 @@ const SETTINGS_KEY = 'fb-poster-settings'
 const MAX_HISTORY = 50
 
 function App() {
+  const { t, i18n } = useTranslation()
   const [inputText, setInputText] = useState('')
   const [outputText, setOutputText] = useState('')
   const [replacementRules, setReplacementRules] = useState(DEFAULT_RULES)
   const [history, setHistory] = useState([])
   const [showHistory, setShowHistory] = useState(false)
   const [outputFormat, setOutputFormat] = useState('plain') // 'plain' 或 'fb'
+
+  // 切換語言
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng)
+    localStorage.setItem('language', lng)
+  }
 
   // 載入歷史紀錄和設定
   useEffect(() => {
@@ -83,7 +91,7 @@ function App() {
 
   // 清空所有歷史紀錄
   const clearAllHistory = () => {
-    if (confirm('確定要清空所有歷史紀錄嗎？')) {
+    if (confirm(t('history.confirm'))) {
       setHistory([])
       localStorage.removeItem(HISTORY_KEY)
     }
@@ -93,7 +101,7 @@ function App() {
   const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text)
-      toast.success('✓ 已成功複製到剪貼簿！', {
+      toast.success(t('toast.copySuccess'), {
         duration: 2000,
         position: 'top-center',
         style: {
@@ -108,7 +116,7 @@ function App() {
         icon: '📋',
       })
     } catch (err) {
-      toast.error('❌ 複製失敗，請手動複製', {
+      toast.error(t('toast.copyError'), {
         duration: 3000,
         position: 'top-center',
         style: {
@@ -206,12 +214,39 @@ function App() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header - 野獸派風格 */}
         <header className="container-brutalist p-6 md:p-8 bg-brutalist-red">
-          <h1 className="title-brutalist text-brutalist-white border-brutalist-white">
-            CLAUDE 發文救星
-          </h1>
-          <p className="mt-4 text-lg md:text-xl font-bold text-brutalist-white uppercase">
-            用來取代 Claude 輸出的奇怪字元
-          </p>
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h1 className="title-brutalist text-brutalist-white border-brutalist-white">
+                {t('app.title')}
+              </h1>
+              <p className="mt-4 text-lg md:text-xl font-bold text-brutalist-white uppercase">
+                {t('app.subtitle')}
+              </p>
+            </div>
+            {/* 語言切換器 */}
+            <div className="flex gap-2">
+              <button
+                className={`px-4 py-2 font-bold border-4 border-brutalist-black transition-all ${
+                  i18n.language === 'zh-TW'
+                    ? 'bg-brutalist-yellow text-brutalist-black'
+                    : 'bg-brutalist-white text-brutalist-black hover:translate-x-1 hover:translate-y-1'
+                }`}
+                onClick={() => changeLanguage('zh-TW')}
+              >
+                繁中
+              </button>
+              <button
+                className={`px-4 py-2 font-bold border-4 border-brutalist-black transition-all ${
+                  i18n.language === 'en'
+                    ? 'bg-brutalist-yellow text-brutalist-black'
+                    : 'bg-brutalist-white text-brutalist-black hover:translate-x-1 hover:translate-y-1'
+                }`}
+                onClick={() => changeLanguage('en')}
+              >
+                EN
+              </button>
+            </div>
+          </div>
         </header>
 
         {/* Main Grid */}
@@ -221,7 +256,7 @@ function App() {
             {/* 輸入框 */}
             <div className="container-brutalist p-6 bg-brutalist-white">
               <h2 className="text-2xl font-bold uppercase mb-4 border-b-4 border-brutalist-black pb-2">
-                📝 輸入文字
+                {t('input.title')}
               </h2>
               <textarea
                 id="input"
@@ -229,7 +264,7 @@ function App() {
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onPaste={handlePaste}
-                placeholder="輸入或貼上文字..."
+                placeholder={t('input.placeholder')}
               />
             </div>
 
@@ -239,39 +274,39 @@ function App() {
                 className="btn-brutalist-primary w-full text-xl py-4"
                 onClick={handleConvertAndCopy}
               >
-                🚀 轉換與複製
+                {t('buttons.convertAndCopy')}
               </button>
             </div>
 
             {/* 說明 */}
             <div className="container-brutalist p-6 bg-brutalist-yellow border-brutalist-black">
-              <h3 className="text-2xl font-bold uppercase mb-3">💡 使用說明</h3>
+              <h3 className="text-2xl font-bold uppercase mb-3">{t('instructions.title')}</h3>
               <div className="space-y-3 font-mono text-base">
                 <div>
-                  <p className="font-bold mb-2">🎯 這個工具解決什麼問題？</p>
-                  <p className="pl-4">Claude 輸出的文字常常有奇怪的英文標點符號</p>
-                  <p className="pl-4">自動轉換成適合發文的中文標點符號</p>
+                  <p className="font-bold mb-2">{t('instructions.problem.title')}</p>
+                  <p className="pl-4">{t('instructions.problem.line1')}</p>
+                  <p className="pl-4">{t('instructions.problem.line2')}</p>
                 </div>
                 <hr className="border-2 border-brutalist-black my-3" />
                 <div>
-                  <p className="font-bold mb-1">📝 步驟一：貼上文字</p>
-                  <p className="pl-4">在左側輸入框貼上 Claude 的輸出</p>
-                  <p className="pl-4">⚡ 貼上後會瞬間自動轉換並複製</p>
+                  <p className="font-bold mb-1">{t('instructions.step1.title')}</p>
+                  <p className="pl-4">{t('instructions.step1.line1')}</p>
+                  <p className="pl-4">{t('instructions.step1.line2')}</p>
                 </div>
                 <div>
-                  <p className="font-bold mb-1">📋 步驟二：直接貼到社群</p>
-                  <p className="pl-4">轉換完成自動複製到剪貼簿</p>
-                  <p className="pl-4">直接到 Facebook、Instagram 貼上即可</p>
+                  <p className="font-bold mb-1">{t('instructions.step2.title')}</p>
+                  <p className="pl-4">{t('instructions.step2.line1')}</p>
+                  <p className="pl-4">{t('instructions.step2.line2')}</p>
                 </div>
                 <hr className="border-2 border-brutalist-black my-3" />
                 <div>
-                  <p className="font-bold mb-2">🛠️ 預設轉換規則</p>
-                  <p className="pl-4">• 英文逗號+空白 → 中文逗號</p>
-                  <p className="pl-4">• 英文句號 → 中文句號</p>
-                  <p className="pl-4">• 英文驚嘆號 → 中文驚嘆號</p>
-                  <p className="pl-4">• 英文問號 → 中文問號</p>
-                  <p className="pl-4">• 連字號 → 項目符號</p>
-                  <p className="pl-4 mt-2 text-sm">※ 可以在右側自訂替換規則</p>
+                  <p className="font-bold mb-2">{t('instructions.rules.title')}</p>
+                  <p className="pl-4">{t('instructions.rules.rule1')}</p>
+                  <p className="pl-4">{t('instructions.rules.rule2')}</p>
+                  <p className="pl-4">{t('instructions.rules.rule3')}</p>
+                  <p className="pl-4">{t('instructions.rules.rule4')}</p>
+                  <p className="pl-4">{t('instructions.rules.rule5')}</p>
+                  <p className="pl-4 mt-2 text-sm">{t('instructions.rules.note')}</p>
                 </div>
               </div>
             </div>
@@ -279,20 +314,20 @@ function App() {
             {/* 歷史紀錄 */}
             <div className="container-brutalist p-6 bg-brutalist-pink">
               <div className="flex justify-between items-center mb-4 border-b-4 border-brutalist-black pb-2">
-                <h3 className="text-2xl font-bold uppercase text-brutalist-black">📜 歷史紀錄</h3>
+                <h3 className="text-2xl font-bold uppercase text-brutalist-black">{t('history.title')}</h3>
                 <div className="flex gap-2">
                   <button
                     className="text-sm px-3 py-1 bg-white text-black border-2 border-brutalist-black font-bold hover:translate-x-1 hover:translate-y-1 transition-transform"
                     onClick={() => setShowHistory(!showHistory)}
                   >
-                    {showHistory ? '收合' : `展開 (${history.length})`}
+                    {showHistory ? t('buttons.collapse') : `${t('buttons.expand')} (${history.length})`}
                   </button>
                   {history.length > 0 && (
                     <button
                       className="btn-brutalist-danger text-sm px-3 py-1"
                       onClick={clearAllHistory}
                     >
-                      清空
+                      {t('buttons.clear')}
                     </button>
                   )}
                 </div>
@@ -302,7 +337,7 @@ function App() {
                 <div className="space-y-2 max-h-[400px] overflow-y-auto">
                   {history.length === 0 ? (
                     <p className="text-brutalist-black text-center py-4 font-mono bg-white p-4 border-4 border-brutalist-black">
-                      尚無歷史紀錄
+                      {t('history.empty')}
                     </p>
                   ) : (
                     history.map((record) => (
@@ -313,7 +348,7 @@ function App() {
                         <div className="flex justify-between items-start mb-2">
                           <div>
                             <span className="text-xs font-mono text-gray-600 block">
-                              {new Date(record.timestamp).toLocaleString('zh-TW')}
+                              {new Date(record.timestamp).toLocaleString(i18n.language === 'zh-TW' ? 'zh-TW' : 'en-US')}
                             </span>
                             {record.format && (
                               <span className={`text-xs px-2 py-0.5 mt-1 inline-block border border-black font-bold ${
@@ -321,7 +356,7 @@ function App() {
                                   ? 'bg-brutalist-green text-black' 
                                   : 'bg-gray-200 text-black'
                               }`}>
-                                {record.format === 'fb' ? 'FB 格式' : '純文字'}
+                                {t(`history.format.${record.format}`)}
                               </span>
                             )}
                           </div>
@@ -330,21 +365,21 @@ function App() {
                               className="text-xs px-2 py-1 bg-white text-black border-2 border-brutalist-black font-bold hover:translate-x-1 hover:translate-y-1 transition-transform"
                               onClick={() => loadFromHistory(record)}
                             >
-                              載入
+                              {t('buttons.load')}
                             </button>
                             <button
                               className="text-xs px-2 py-1 bg-brutalist-red text-brutalist-white border-2 border-brutalist-black font-bold hover:bg-brutalist-orange"
                               onClick={() => deleteHistoryItem(record.id)}
                             >
-                              刪除
+                              {t('buttons.deleteItem')}
                             </button>
                           </div>
                         </div>
                         <p className="text-sm font-mono truncate mb-1 text-brutalist-black">
-                          <strong>輸入：</strong>{record.input}
+                          <strong>{t('history.input')}</strong>{record.input}
                         </p>
                         <p className="text-sm font-mono truncate text-brutalist-black">
-                          <strong>輸出：</strong>{record.output}
+                          <strong>{t('history.output')}</strong>{record.output}
                         </p>
                       </div>
                     ))
@@ -360,7 +395,7 @@ function App() {
             <div className="container-brutalist p-6 bg-brutalist-white relative">
               <div className="flex justify-between items-center mb-4 border-b-4 border-brutalist-black pb-2">
                 <h2 className="text-2xl font-bold uppercase">
-                  ✨ 轉換結果
+                  {t('output.title')}
                 </h2>
               </div>
               <textarea
@@ -368,14 +403,14 @@ function App() {
                 className="input-brutalist min-h-[300px] resize-y bg-gray-50"
                 value={outputText}
                 readOnly
-                placeholder="轉換結果會自動顯示並複製..."
+                placeholder={t('output.placeholder')}
               />
             </div>
 
             {/* 文字替換規則 */}
             <div className="container-brutalist p-6 bg-brutalist-blue">
               <h2 className="text-2xl font-bold uppercase mb-4 text-brutalist-black border-b-4 border-brutalist-black pb-2">
-                ⚙️ 文字替換規則
+                {t('rules.title')}
               </h2>
               <div className="space-y-3">
                 {replacementRules.map((rule, index) => (
@@ -383,7 +418,7 @@ function App() {
                     <input
                       type="text"
                       className="input-brutalist flex-1 p-2 text-sm"
-                      placeholder="原文字"
+                      placeholder={t('rules.fromPlaceholder')}
                       value={rule.from}
                       onChange={(e) => updateRule(index, 'from', e.target.value)}
                     />
@@ -391,7 +426,7 @@ function App() {
                     <input
                       type="text"
                       className="input-brutalist flex-1 p-2 text-sm"
-                      placeholder="替換文字"
+                      placeholder={t('rules.toPlaceholder')}
                       value={rule.to}
                       onChange={(e) => updateRule(index, 'to', e.target.value)}
                     />
@@ -399,17 +434,17 @@ function App() {
                       className="btn-brutalist-danger text-sm px-4 py-2"
                       onClick={() => removeRule(index)}
                     >
-                      X
+                      {t('buttons.delete')}
                     </button>
                   </div>
                 ))}
               </div>
               <div className="flex gap-3 mt-4">
                 <button className="btn-brutalist-secondary flex-1" onClick={addRule}>
-                  + 新增
+                  {t('buttons.add')}
                 </button>
                 <button className="btn-brutalist text-sm" onClick={loadDefaultRules}>
-                  載入預設
+                  {t('buttons.loadDefault')}
                 </button>
               </div>
             </div>
@@ -417,7 +452,7 @@ function App() {
             {/* 輸出格式選擇 */}
             <div className="container-brutalist p-6 bg-brutalist-green">
               <h2 className="text-2xl font-bold uppercase mb-4 border-b-4 border-brutalist-black pb-2">
-                📋 輸出格式
+                {t('format.title')}
               </h2>
               <div className="space-y-3">
                 <label className="flex items-center gap-3 cursor-pointer p-3 bg-white border-4 border-brutalist-black hover:translate-x-1 hover:translate-y-1 transition-transform">
@@ -430,8 +465,8 @@ function App() {
                     className="w-5 h-5 cursor-pointer"
                   />
                   <div>
-                    <span className="text-lg font-bold uppercase block">純文字</span>
-                    <span className="text-sm text-gray-600">只轉換標點符號</span>
+                    <span className="text-lg font-bold uppercase block">{t('format.plain.title')}</span>
+                    <span className="text-sm text-gray-600">{t('format.plain.description')}</span>
                   </div>
                 </label>
                 <label className="flex items-center gap-3 cursor-pointer p-3 bg-white border-4 border-brutalist-black hover:translate-x-1 hover:translate-y-1 transition-transform">
@@ -444,8 +479,8 @@ function App() {
                     className="w-5 h-5 cursor-pointer"
                   />
                   <div>
-                    <span className="text-lg font-bold uppercase block">FB 發文格式</span>
-                    <span className="text-sm text-gray-600">保留空白與換行</span>
+                    <span className="text-lg font-bold uppercase block">{t('format.fb.title')}</span>
+                    <span className="text-sm text-gray-600">{t('format.fb.description')}</span>
                   </div>
                 </label>
               </div>
@@ -456,7 +491,7 @@ function App() {
         {/* Footer - Copyright */}
         <footer className="container-brutalist p-4 bg-brutalist-white text-center">
           <p className="font-mono text-brutalist-black uppercase tracking-wide">
-            © 2025 @LukaHuang - All Rights Reserved
+            {t('footer.copyright')}
           </p>
         </footer>
       </div>
