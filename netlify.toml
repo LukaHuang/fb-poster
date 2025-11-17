@@ -2,11 +2,29 @@
   command = "npm run build"
   publish = "dist"
 
+# 強制 HTTPS 重定向
+[[redirects]]
+  from = "http://claude-poster.luka.tw/*"
+  to = "https://claude-poster.luka.tw/:splat"
+  status = 301
+  force = true
+
 # SPA 路由設定
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+# 安全標頭
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
 
 # 快取設定
 [[headers]]
