@@ -1,6 +1,6 @@
 /**
- * 空白字元轉換器 - 模仿 piliapp 的功能
- * 在空格和換行符之間注入零寬度空格（zero-width space）
+ * 空白字元轉換器
+ * 在每個空格和換行符後面注入零寬度空格（zero-width space）
  * 用於規避社交媒體平台對多個連續空白的限制
  */
 
@@ -8,7 +8,7 @@
 const ZERO_WIDTH_SPACE = '\u200B';
 
 /**
- * 轉換文本，在空格和換行符之間注入零寬度空格
+ * 轉換文本，在每個空格和換行符後面注入零寬度空格
  * @param {string} text - 原始文本
  * @returns {string} - 轉換後的文本
  */
@@ -17,17 +17,11 @@ export function convertWhitespace(text) {
 
   let result = text;
 
-  // 在連續的空格之間插入零寬度空格
-  // 例如：將 "  " 轉換為 " \u200B "
-  result = result.replace(/ {2,}/g, (match) => {
-    return match.split('').join(ZERO_WIDTH_SPACE);
-  });
+  // 在每個空格後面插入零寬度空格
+  result = result.replace(/ /g, ` ${ZERO_WIDTH_SPACE}`);
 
-  // 在換行符之間插入零寬度空格
-  // 這樣可以在貼到社交媒體時保留多個換行
-  result = result.replace(/\n{2,}/g, (match) => {
-    return match.split('').join(ZERO_WIDTH_SPACE);
-  });
+  // 在每個換行後面插入零寬度空格
+  result = result.replace(/\n/g, `\n${ZERO_WIDTH_SPACE}`);
 
   return result;
 }

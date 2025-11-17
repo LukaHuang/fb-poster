@@ -67,7 +67,7 @@ export function validateRules(rules) {
  * 預設替換規則範例
  */
 export const DEFAULT_RULES = [
-  { from: ',', to: '，' },  // 英文逗號轉中文逗號
+  { from: ', ', to: '，' },  // 英文逗號+空白轉中文逗號
   { from: '.', to: '。' },  // 英文句號轉中文句號
   { from: '!', to: '！' },  // 英文驚嘆號轉中文驚嘆號
   { from: '?', to: '？' },  // 英文問號轉中文問號

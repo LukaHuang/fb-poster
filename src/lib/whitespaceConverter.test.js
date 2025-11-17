@@ -11,30 +11,47 @@ const ZERO_WIDTH_SPACE = '\u200B'
 
 describe('whitespaceConverter', () => {
   describe('convertWhitespace', () => {
-    it('應該在連續空格之間插入零寬度空格', () => {
+    it('應該在每個空格後插入零寬度空格', () => {
+      const input = 'Hello World'
+      const output = convertWhitespace(input)
+
+      expect(output).toContain(ZERO_WIDTH_SPACE)
+      expect(output).toBe(`Hello ${ZERO_WIDTH_SPACE}World`)
+    })
+
+    it('應該在連續空格後都插入零寬度空格', () => {
       const input = 'Hello  World'
       const output = convertWhitespace(input)
 
-      expect(output).toContain(ZERO_WIDTH_SPACE)
-      expect(output).not.toBe(input)
+      // 兩個空格都應該被處理
+      const zwsCount = (output.match(/\u200B/g) || []).length
+      expect(zwsCount).toBe(2)
     })
 
-    it('應該處理多個連續空格（3個以上）', () => {
+    it('應該處理多個連續空格', () => {
       const input = 'Test    multiple    spaces'
       const output = convertWhitespace(input)
 
-      // 應該包含零寬度空格
+      // 每個空格後面都應該有零寬度空格
       expect(output).toContain(ZERO_WIDTH_SPACE)
-      // 原始空格數量應該被保留（加上零寬度空格）
       expect(output.length).toBeGreaterThan(input.length)
     })
 
-    it('應該在連續換行之間插入零寬度空格', () => {
-      const input = 'Line 1\n\nLine 2'
+    it('應該在每個換行後插入零寬度空格', () => {
+      const input = 'Line 1\nLine 2'
       const output = convertWhitespace(input)
 
       expect(output).toContain(ZERO_WIDTH_SPACE)
-      expect(output).toContain('\n')
+      expect(output).toBe(`Line 1\n${ZERO_WIDTH_SPACE}Line 2`)
+    })
+
+    it('應該在連續換行後都插入零寬度空格', () => {
+      const input = 'Line 1\n\nLine 2'
+      const output = convertWhitespace(input)
+
+      // 兩個換行都應該被處理
+      const zwsCount = (output.match(/\u200B/g) || []).length
+      expect(zwsCount).toBe(2)
     })
 
     it('應該處理多個連續換行', () => {
@@ -45,6 +62,9 @@ describe('whitespaceConverter', () => {
       // 換行應該被保留
       const newlineCount = (output.match(/\n/g) || []).length
       expect(newlineCount).toBe(3)
+      // 應該有3個零寬度空格（每個換行後一個）
+      const zwsCount = (output.match(/\u200B/g) || []).length
+      expect(zwsCount).toBe(3)
     })
 
     it('應該處理空字串', () => {
@@ -56,20 +76,15 @@ describe('whitespaceConverter', () => {
       expect(convertWhitespace(undefined)).toBe('')
     })
 
-    it('應該處理單個空格（不轉換）', () => {
-      const input = 'Hello World'
-      const output = convertWhitespace(input)
-
-      // 單個空格不應該被轉換
-      expect(output).toBe(input)
-    })
-
-    it('應該處理混合情況（多空格和多換行）', () => {
+    it('應該處理混合情況（空格和換行）', () => {
       const input = 'Title\n\n\nContent  with  spaces'
       const output = convertWhitespace(input)
 
       expect(output).toContain(ZERO_WIDTH_SPACE)
       expect(output).toContain('\n')
+      // 3個換行 + 4個空格 = 7個零寬度空格
+      const zwsCount = (output.match(/\u200B/g) || []).length
+      expect(zwsCount).toBe(7)
     })
 
     it('應該保留原始文字內容', () => {
@@ -79,6 +94,16 @@ describe('whitespaceConverter', () => {
       // 移除零寬度空格後應該等於原始輸入
       const cleaned = output.replace(/\u200B/g, '')
       expect(cleaned).toBe(input)
+    })
+
+    it('應該在每個空格和換行後插入零寬度空格', () => {
+      const input = 'A B\nC'
+      const output = convertWhitespace(input)
+      
+      // 應該有2個零寬度空格（1個空格 + 1個換行）
+      const zwsCount = (output.match(/\u200B/g) || []).length
+      expect(zwsCount).toBe(2)
+      expect(output).toBe(`A ${ZERO_WIDTH_SPACE}B\n${ZERO_WIDTH_SPACE}C`)
     })
   })
 
