@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import toast, { Toaster } from 'react-hot-toast'
 import { convertWhitespace } from './lib/whitespaceConverter'
@@ -16,6 +16,63 @@ function App() {
   const [history, setHistory] = useState([])
   const [showHistory, setShowHistory] = useState(false)
   const [outputFormat, setOutputFormat] = useState('plain') // 'plain' 或 'fb'
+
+  // refs for textarea synchronization
+  const inputRef = useRef(null)
+  const outputRef = useRef(null)
+
+  // 同步捲動
+  const handleInputScroll = () => {
+    if (inputRef.current && outputRef.current) {
+      outputRef.current.scrollTop = inputRef.current.scrollTop
+    }
+  }
+
+  const handleOutputScroll = () => {
+    if (inputRef.current && outputRef.current) {
+      inputRef.current.scrollTop = outputRef.current.scrollTop
+    }
+  }
+
+  // 同步高度
+  useEffect(() => {
+    const adjustHeight = () => {
+      if (inputRef.current && outputRef.current) {
+        // 保存當前滾動位置和游標位置
+        const inputScrollTop = inputRef.current.scrollTop
+        const outputScrollTop = outputRef.current.scrollTop
+        const selectionStart = inputRef.current.selectionStart
+        const selectionEnd = inputRef.current.selectionEnd
+        const activeElement = document.activeElement
+
+        // 重置高度以獲取正確的 scrollHeight
+        inputRef.current.style.height = 'auto'
+        outputRef.current.style.height = 'auto'
+
+        // 取得兩者中較高的那個
+        const inputHeight = inputRef.current.scrollHeight
+        const outputHeight = outputRef.current.scrollHeight
+        const maxHeight = Math.max(inputHeight, outputHeight)
+
+        // 設定相同的高度,最小 300px
+        const finalHeight = Math.max(maxHeight, 300)
+        inputRef.current.style.height = `${finalHeight}px`
+        outputRef.current.style.height = `${finalHeight}px`
+
+        // 恢復滾動位置
+        inputRef.current.scrollTop = inputScrollTop
+        outputRef.current.scrollTop = outputScrollTop
+
+        // 如果 input 是當前焦點元素,恢復游標位置
+        if (activeElement === inputRef.current) {
+          inputRef.current.setSelectionRange(selectionStart, selectionEnd)
+        }
+      }
+    }
+
+    // 使用 requestAnimationFrame 避免跳動
+    requestAnimationFrame(adjustHeight)
+  }, [inputText, outputText])
 
   // 切換語言
   const changeLanguage = (lng) => {
@@ -154,23 +211,6 @@ function App() {
     }
   }, [inputText, replacementRules, outputFormat])
 
-  // 處理貼上事件 - 一貼上就自動轉換並複製
-  const handlePaste = async (e) => {
-    e.preventDefault()
-    const pastedText = e.clipboardData.getData('text')
-    setInputText(pastedText)
-
-    // 貼上後自動轉換並複製
-    const result = performConversion(pastedText)
-    setOutputText(result)
-
-    if (result) {
-      copyToClipboard(result)
-      if (result !== pastedText) {
-        saveToHistory(pastedText, result, outputFormat)
-      }
-    }
-  }
 
   // 轉換與複製按鈕
   const handleConvertAndCopy = () => {
@@ -260,10 +300,11 @@ function App() {
               </h2>
               <textarea
                 id="input"
-                className="input-brutalist min-h-[300px] resize-y"
+                ref={inputRef}
+                className="input-brutalist min-h-[300px] resize-none overflow-y-auto"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                onPaste={handlePaste}
+                onScroll={handleInputScroll}
                 placeholder={t('input.placeholder')}
               />
             </div>
@@ -400,9 +441,11 @@ function App() {
               </div>
               <textarea
                 id="output"
-                className="input-brutalist min-h-[300px] resize-y bg-gray-50"
+                ref={outputRef}
+                className="input-brutalist min-h-[300px] resize-none overflow-y-auto bg-gray-50"
                 value={outputText}
                 readOnly
+                onScroll={handleOutputScroll}
                 placeholder={t('output.placeholder')}
               />
             </div>
